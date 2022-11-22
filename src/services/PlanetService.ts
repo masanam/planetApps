@@ -1,8 +1,12 @@
 import http from '../http-common'
 import IPlanetData from '../types/Planet'
 
-const getAll = async () => {
-  return await http.get<IPlanetData[]>('/planets')
+const getAll = async (page: number) => {
+  if (page != null && page > 1) {
+    return await http.get<IPlanetData[]>('/planets/?page=' + page)
+  } else {
+    return await http.get<IPlanetData[]>('/planets')
+  }
 }
 
 const get = async (id: any) => {

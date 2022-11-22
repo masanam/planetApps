@@ -2,24 +2,40 @@ import React, { useState, useEffect } from 'react'
 import PlanetDataService from '../services/PlanetService'
 import { Link } from 'react-router-dom'
 import IPlanetData from '../types/Planet'
+import InfiniteScroll from 'react-infinite-scroller'
 
 const PlanetsList = () => {
-  const [planets, setPlanets] = useState<IPlanetData[]>([])
   const [currentPlanet, setCurrentPlanet] = useState<IPlanetData | null>(null)
   const [currentIndex, setCurrentIndex] = useState<number>(-1)
 
+  const [planets, setPlanets] = useState<IPlanetData[]>([])
+  const [page, setPage] = useState(1)
+  const [hasMoreItems, setHasMoreItems] = useState(true)
+
   useEffect(() => {
-    retrievePlanets()
+    retrievePlanets(page)
   }, [])
 
-  const retrievePlanets = () => {
-    PlanetDataService.getAll()
-      .then((response: any) => {
-        setPlanets(response.data.results)
-      })
-      .catch((e: Error) => {
-        console.log()
-      })
+  const retrievePlanets = (page: number) => {
+    setTimeout(() => {
+      PlanetDataService.getAll(page)
+        .then((response: any) => {
+          const newPage = page + 1
+          const newList = response.data.results
+          setPlanets(newList)
+          setPage(newPage)
+          console.log(response.status)
+          if (response.status === 404) {
+            setHasMoreItems(false)
+          } else {
+            setHasMoreItems(true)
+          }
+        })
+        .catch((err) => {
+          setHasMoreItems(false)
+          console.log(err)
+        })
+    }, 1500)
   }
 
   const setActivePlanet = (planet: IPlanetData, index: number) => {
@@ -32,7 +48,14 @@ const PlanetsList = () => {
       <div className="col-md-6">
         <h4>Planets List</h4>
 
-        <ul className="list-group">
+        <ul className="list-group mb-2">
+        <InfiniteScroll
+          threshold={0}
+          pageStart={0}
+          loadMore={retrievePlanets}
+          hasMore={hasMoreItems}
+          loader={<div className="text-center">loading data ...</div>}>
+
           {planets &&
             planets.map((planet, index) => (
               <li
@@ -45,6 +68,8 @@ const PlanetsList = () => {
                 {planet.name}
               </li>
             ))}
+        </InfiniteScroll>
+        {hasMoreItems ? '' : <div className="text-center">no data anymore ...</div> }
         </ul>
 
       </div>

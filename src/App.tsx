@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import './App.css'
 import PlanetList from './components/PlanetList'
 
-const App: React.FC = () => {
+const App = () => {
   return (
     <div>
       <nav className="navbar navbar-expand navbar-dark bg-dark">
